@@ -3,8 +3,16 @@
  *
  * An implementation of fibonacci heap over integers.
  */
+
+
 public class FibonacciHeap
 {
+	private HeapNode min;
+	private HeapNode first;
+    private int size = 0;
+    private static int numOfCuts = 0; 
+    private static int numOfLinks = 0;
+    private int numOfMarkedNodes = 0;
 
    /**
     * public boolean isEmpty()
@@ -17,7 +25,8 @@ public class FibonacciHeap
     */
     public boolean isEmpty()
     {
-    	return false; // should be replaced by student code
+    	return (this.size == 0); 
+    	//return (this.first == null);
     }
 		
    /**
@@ -29,7 +38,29 @@ public class FibonacciHeap
     */
     public HeapNode insert(int key)
     {    
-    	return new HeapNode(key); // should be replaced by student code
+    	//creating new HeapNode
+    	HeapNode newNode = new HeapNode(key);
+    
+    	if(this.isEmpty()) { 
+    		this.first = newNode;
+    		this.min = newNode;
+    		this.min.next = newNode; this.min.prev = newNode; //making it a circular doubly linked list
+    		
+    	}else {
+    		this.first.prev.next = newNode; //closing the circle including the new node
+    		newNode.prev = this.first.prev; //like wise
+    		this.first.prev = newNode;		
+    		newNode.next = this.first;		
+    		this.first = newNode;			//updating first
+    	}
+    	
+    	//checking if the new node is also the new min
+    	if(newNode.key < this.min.key) {
+    		this.min = newNode;
+    	}
+    	
+    	this.size++;
+    	return newNode; 
     }
 
    /**
@@ -52,7 +83,7 @@ public class FibonacciHeap
     */
     public HeapNode findMin()
     {
-    	return new HeapNode(0);// should be replaced by student code
+    	return this.min;
     } 
     
    /**
@@ -74,7 +105,7 @@ public class FibonacciHeap
     */
     public int size()
     {
-    	return 0; // should be replaced by student code
+    	return this.size;
     }
     	
     /**
@@ -85,10 +116,35 @@ public class FibonacciHeap
     */
     public int[] countersRep()
     {
-	int[] arr = new int[42];
-        return arr; //	 to be replaced by student code
+    	int[] arr = new int[this.maxRank() + 1];
+    	arr[this.first.rank]++; 
+    	
+    	HeapNode curr = this.first.next;
+    	while(curr != this.first) { //same as in maxRank
+    		arr[curr.rank]++;
+    		curr = curr.next;
+    	}
+        return arr; 
     }
 	
+    /**
+     * public static int maxRank()
+     * iterating over the ranks of each root, and returning the max rank
+     */
+    public int maxRank() {
+    	int maxRank = this.first.rank;
+    	HeapNode curr = this.first.next;
+    	while(curr != this.first) { //circular linked list, eventually it will go back to the first one.
+    		if(curr.rank > maxRank) {
+    			maxRank = curr.rank;
+    		}
+    		curr = curr.next;
+    	}
+    	return maxRank;
+    }
+    
+    
+    
    /**
     * public void delete(HeapNode x)
     *
@@ -133,7 +189,7 @@ public class FibonacciHeap
     */
     public static int totalLinks()
     {    
-    	return 0; // should be replaced by student code
+    	return numOfLinks;
     }
 
    /**
@@ -144,7 +200,7 @@ public class FibonacciHeap
     */
     public static int totalCuts()
     {    
-    	return 0; // should be replaced by student code
+    	return numOfCuts;
     }
 
      /**
@@ -169,11 +225,21 @@ public class FibonacciHeap
     *  
     */
     public class HeapNode{
-
-	public int key;
+    	public int key;
+    	private int rank;
+    	private boolean marked; //if marked than true, else false
+    	private HeapNode child; //left child
+    	private HeapNode next;
+    	private HeapNode prev;
+    	private HeapNode parent;
 
   	public HeapNode(int key) {
 	    this.key = key;
+	    this.rank = 0; //when created, heapNode has no children
+	    this.child = null;
+	    this.next = null;
+	    this.prev = null;
+	    this.parent = null;
       }
 
   	public int getKey() {
@@ -182,3 +248,6 @@ public class FibonacciHeap
 
     }
 }
+
+
+

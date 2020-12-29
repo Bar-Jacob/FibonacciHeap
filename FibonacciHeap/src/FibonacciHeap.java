@@ -4,7 +4,6 @@
  * An implementation of fibonacci heap over integers.
  */
 
-
 public class FibonacciHeap
 {
 	private HeapNode min;
@@ -216,6 +215,14 @@ public class FibonacciHeap
         return arr; // should be replaced by student code
     }
     
+    /**
+     * public HeapNode getFirst()
+     * return the first HeapNode in the heap
+     */
+    public HeapNode getFirst() {
+    	return this.first;
+    }
+    
    /**
     * public class HeapNode
     * 
@@ -245,6 +252,26 @@ public class FibonacciHeap
   	public int getKey() {
 	    return this.key;
       }
+  	
+  	public int getRank() {
+  		return this.rank;
+  	}
+  	
+  	public HeapNode getChild() {
+  		return this.child;
+  	}
+  	
+  	public HeapNode getNext() {
+  		return this.next;
+  	}
+  	
+  	public HeapNode getPrev() {
+  		return this.prev;
+  	}
+
+  	public HeapNode getParent() {
+  		return this.parent;
+  	}
 
     }
 }

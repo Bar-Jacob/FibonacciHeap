@@ -90,10 +90,26 @@ public class FibonacciHeap
     *
     * Meld the heap with heap2
     *
+    * our notes:
+    * meld this => x-y-z with heap2 => a-b-c
+    * before meld -> this.first.prev = z, heap2.first.prev = c
+    * after meld -> this.first.prev = c, no heap2
     */
     public void meld (FibonacciHeap heap2)
     {
-    	  return; // should be replaced by student code   		
+    	//connecting c with x
+    	heap2.first.prev.next = this.first; 
+    	//connecting z with a
+    	this.first.prev.next = heap2.first; 
+    	//connecting x with c
+    	this.first.prev = heap2.first.prev;
+    	//connecting a with z
+    	heap2.first.prev = this.first.prev;
+    	
+    	if(heap2.min.getKey() < this.min.getKey()) { //updating new min
+    		this.min = heap2.min;
+    		heap2.min = null;
+    	}		
     }
 
    /**

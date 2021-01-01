@@ -41,17 +41,13 @@ public class FibonacciHeap
     	HeapNode newNode = new HeapNode(key);
     
     	if(this.isEmpty()) { 
-    		this.first = newNode;
     		this.min = newNode;
     		this.min.next = newNode; this.min.prev = newNode; //making it a circular doubly linked list
     		
     	}else {
-    		this.first.prev.next = newNode; //closing the circle including the new node
-    		newNode.prev = this.first.prev; //like wise
-    		this.first.prev = newNode;		
-    		newNode.next = this.first;		
-    		this.first = newNode;			//updating first
+    		this.first.setSibling(newNode);		
     	}
+    	this.first = newNode;			//updating first
     	
     	//checking if the new node is also the new min
     	if(newNode.key < this.min.key) {
@@ -227,9 +223,56 @@ public class FibonacciHeap
     */
     public static int[] kMin(FibonacciHeap H, int k)
     {    
-        int[] arr = new int[42];
-        return arr; // should be replaced by student code
+    	int[] arr = new int[k];
+    	FibonacciHeap fibHeap = new FibonacciHeap();
+        HeapNode currNode = H.findMin(); //this is the first min key
+        
+        // k iterations for k min keys
+        for(int i = 0; i < k; i++) { 
+            if(currNode != null) { //the node has a son
+            	//inserting the first node 
+            	HeapNode iNode = fibHeap.insert(currNode.getKey()); // iNode = inserted Node
+                iNode.setInfo(currNode); 							//connecting a node from fibHeap it's origin in H
+                currNode = currNode.next;
+                while(currNode != null || currNode != H.first) {	//we always start from the first because we have pointer to the left most child
+                	iNode = fibHeap.insert(currNode.getKey());
+                    iNode.setInfo(currNode); 						
+                    currNode = currNode.next;
+                }
+            } 
+            currNode = fibHeap.findMin().getInfo(); //finding the min and it's origin to insert
+            arr[i] = currNode.getKey();
+            fibHeap.deleteMin(); 
+            currNode = currNode.child; //continuing to the next level
+        }
+        return arr;
     }
+    
+    
+    /**
+     * HeapNode link(HeapNode a, HeapNode b)
+     * link 2 trees with the rank (k) in the heap to one tree with rank k+1
+     * returns the root of the new tree
+     */
+    public HeapNode link(HeapNode a, HeapNode b) {
+        HeapNode parent;
+        HeapNode child;
+        if (a.getKey() < b.getKey()) { //the smaller will be the root
+            parent = a;
+            child = b;
+        }else {
+            parent = b;
+            child = a;
+        }
+        parent.setChild(child);
+        
+        if(this.first == child) { //update first field
+        	this.first = parent;
+        }
+        numOfLinks++;
+        return parent;
+    }
+    
     
     /**
      * public HeapNode getFirst()
@@ -255,6 +298,7 @@ public class FibonacciHeap
     	private HeapNode next;
     	private HeapNode prev;
     	private HeapNode parent;
+    	private HeapNode info; //only used for kMin
 
   	public HeapNode(int key) {
 	    this.key = key;
@@ -263,6 +307,7 @@ public class FibonacciHeap
 	    this.next = null;
 	    this.prev = null;
 	    this.parent = null;
+	    this.info = null;
       }
 
   	public int getKey() {
@@ -287,6 +332,36 @@ public class FibonacciHeap
 
   	public HeapNode getParent() {
   		return this.parent;
+  	}
+  	
+  	public HeapNode getInfo() {
+  		return this.info;
+  	}
+  	
+  	public void setInfo(HeapNode node) {
+  		this.info = node;
+  	}
+  	
+  	public void setChild(HeapNode node) { //will always set it as leftMost child
+  		node.parent = this; //updating node's parent
+  		if(this.child == null) { //parent has no child
+  			this.child = node;
+  			node.next = node;
+  			node.prev = node;
+  			
+  		}else {
+  			this.child.setSibling(node);
+  		}
+  		this.child = node;
+  		this.rank++;
+  	}
+  	
+  	//add node to the beginning of the sibling's circular linked list
+  	public void setSibling(HeapNode node) { 
+  		this.prev.next = node; //closing the circle including the new sibling
+		node.prev = this.prev; //like wise
+		this.prev = node;		
+		node.next = this;	
   	}
 
     }

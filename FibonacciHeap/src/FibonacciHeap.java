@@ -75,29 +75,30 @@ public class FibonacciHeap
      		this.first=null;
      	}
      	HeapNode node2delete = this.min;
-     	int rootrank = node2delete.getRank();
      	// first we need to remove the min from our heap
      	node2delete.prev.next=node2delete.next; //updating the sibling nodes in the DLL
      	node2delete.next.prev=node2delete.prev;
-     	this.size -= 2^rootrank; // updating the size
-     	
-     	
-     	// now we need to create another heap from the sons of the node we want to delete
-     	FibonacciHeap heap2meld = new FibonacciHeap();
-     	heap2meld.first = node2delete.getChild();
-     	this.size = (2^rootrank)-1; // the size of the new heap is 2^k-1, because we don't need the root
-     	deleteparent(node2delete.getChild());
-     	heap2meld.min = calcmin(heap2meld.first);
-     	// melding:
-     	this.meld(heap2meld);
+     	this.size --; // updating the size
+     	HeapNode after = node2delete.getPrev();
+     	HeapNode before = node2delete.getNext();
+     	HeapNode son = node2delete.getChild();
+     	// updating node2delete's children- their parent should be none and they shouldn't be marked
+     	updatesons(son);
+     	// now add the sons of the min in it's place
+     	before.next=son; after.prev = son.prev;
+     	son.prev.next= after; son.prev = before;
      	// now, we need to successive link our heap
      	successive_link(this);
     }
 
-   private void deleteparent(HeapNode n) {
+   private void updatesons(HeapNode n) {
 	   int key = n.getKey();
 	   do {
-		   n.parent=null;
+		   n.parent = null;
+		   if (n.marked) {
+			   this.numOfMarkedNodes--;
+			   n.marked = false;
+		   }
 		   n = n.getNext();
 	   }
 	   while (n.getKey()!=key); 

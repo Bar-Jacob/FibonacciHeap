@@ -91,7 +91,7 @@ public class FibonacciHeap
     * before meld -> this.first.prev = z, heap2.first.prev = c
     * after meld -> this.first.prev = c, no heap2
     */
-    public void meld (FibonacciHeap heap2)
+   public void meld (FibonacciHeap heap2)
     {
     	//connecting c with x
     	heap2.first.prev.next = this.first; 
@@ -105,7 +105,8 @@ public class FibonacciHeap
     	if(heap2.min.getKey() < this.min.getKey()) { //updating new min
     		this.min = heap2.min;
     		heap2.min = null;
-    	}		
+    	}
+    	this.size += heap2.size();
     }
 
    /**

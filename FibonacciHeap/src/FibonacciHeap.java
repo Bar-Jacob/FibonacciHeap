@@ -255,10 +255,61 @@ private HeapNode calcmin(HeapNode n) {
     * The function decreases the key of the node x by delta. The structure of the heap should be updated
     * to reflect this chage (for example, the cascading cuts procedure should be applied if needed).
     */
+    /**
+    * public void decreaseKey(HeapNode x, int delta)
+    *
+    * The function decreases the key of the node x by delta. The structure of the heap should be updated
+    * to reflect this change (for example, the cascading cuts procedure should be applied if needed).
+    */
     public void decreaseKey(HeapNode x, int delta)
     {    
-    	return; // should be replaced by student code
+    	// first we need to change the key
+    	x.key -= delta;
+    	// next, let's see if the heap property has been disrupted
+    	if (x.getKey()< x.getParent().getKey()) {
+    		return;
+    	}
+    	// we need to cut this branch
+    	HeapNode n = x.getParent();
+    	do {
+    	cut (x,n);
+    	this.insertTree(x);
+    	// if x's parent is not marked yet, we can just mark it
+    	if (!n.marked) {
+    		n.marked=true;
+    		this.numOfMarkedNodes++;
+    		return;
+    	}
+    	// if x's parent is marked, we continue the loop
+    	x = n;
+    	} while (x.marked);
     }
+
+   private void cut(HeapNode x, HeapNode n) { 
+	   // n is the parent of x
+	   x.parent = null;
+	   if (x.marked) {
+		   this.numOfMarkedNodes--;
+		   x.marked = false;
+	   }
+	   n.rank --;
+	   if (x.next==x) { // n has only one child
+		   n.child = null;
+   		}else {
+   			n.child = x.next;
+   			x.next.prev = x.prev; x.prev.next = x.next; // removing x from the DLL
+   		}
+	
+}
+
+
+private void insertTree(HeapNode tree) {
+	HeapNode first = this.first;
+	HeapNode last = first.getPrev();
+	this.first = tree;
+	tree.next = first; first.prev = tree;
+	tree.prev = last; last.next = tree;
+}
 
    /**
     * public int potential() 

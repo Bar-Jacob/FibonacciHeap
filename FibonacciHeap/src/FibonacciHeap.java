@@ -265,6 +265,13 @@ private HeapNode calcmin(HeapNode n) {
     {    
     	// first we need to change the key
     	x.key -= delta;
+    	// if x is a root of a tree, we just need to check if we need to update the min
+    	if (x.getParent()==null) {
+    		if (x.getKey()<this.min.getKey()) {
+    			this.min = x;
+    		}
+    		return;
+    	}
     	// next, let's see if the heap property has been disrupted
     	if (x.getKey()< x.getParent().getKey()) {
     		return;

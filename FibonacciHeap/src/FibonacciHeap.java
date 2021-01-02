@@ -66,9 +66,87 @@ public class FibonacciHeap
     */
     public void deleteMin()
     {
-     	return; // should be replaced by student code
-     	
+     	if (this.isEmpty()) { // we can't delete the min of an empty heap
+     		return;
+     	}
+     	if (this.size()==1) { // if the heap only has one node in it, let's just empty the heap
+     		this.min=null;
+     		this.size=0;
+     		this.first=null;
+     	}
+     	HeapNode node2delete = this.min;
+     	// first we need to remove the min from our heap
+     	node2delete.prev.next=node2delete.next; //updating the sibling nodes in the DLL
+     	node2delete.next.prev=node2delete.prev;
+     	this.size --; // updating the size
+     	HeapNode after = node2delete.getPrev();
+     	HeapNode before = node2delete.getNext();
+     	HeapNode son = node2delete.getChild();
+     	// updating node2delete's children- their parent should be none and they shouldn't be marked
+     	updatesons(son);
+     	// now add the sons of the min in it's place
+     	before.next=son; after.prev = son.prev;
+     	son.prev.next= after; son.prev = before;
+     	// now, we need to successive link our heap
+     	successive_link(this);
     }
+
+   private void updatesons(HeapNode n) {
+	   int key = n.getKey();
+	   do {
+		   n.parent = null;
+		   if (n.marked) {
+			   this.numOfMarkedNodes--;
+			   n.marked = false;
+		   }
+		   n = n.getNext();
+	   }
+	   while (n.getKey()!=key); 
+}
+
+private void successive_link(FibonacciHeap fibonacciHeap) {
+	   // creating the array we'll export from. it needs to be around log(n)+1 long.
+	HeapNode[] arroftrees = new HeapNode[(int) (Math.ceil(Math.log(this.size))+1)];
+	HeapNode node = this.first;
+	node.prev.next=null; // disconnecting the end of the DLL
+	while (node!= null) {
+		int rank = node.getRank();
+		// we need to meld the trees together until we reach an empty slot
+		while(arroftrees[rank]!= null) {
+			node = link(node, arroftrees[rank]);
+			rank++;
+			}
+		arroftrees[rank]=node;
+		node = node.next;
+	}
+	// now, we need to change our heap to match the array.
+	this.first=null;
+	for (int i = 0; i < arroftrees.length; i++) {
+		HeapNode root = arroftrees[i];
+		if(root!= null) {
+			if (this.first==null) {
+				this.first = root;
+				root.next = root; root.prev=root; // creating a DLL with our first node
+			}else{ // we already inserted a tree to our heap
+				HeapNode last = this.first.prev;
+				last.next = root; root.prev = last;
+				root.next = this.first; this.first.prev = root;
+			}
+		}
+	}
+	this.min=calcmin(this.first);
+}
+
+private HeapNode calcmin(HeapNode n) {
+	int key = n.getKey();  // we need to complete one circular scan, starting at key n.getkey();
+	HeapNode min = n;
+	do {
+		if (n.getKey()<min.getKey()) {min = n;}
+		n = n.getNext();
+	}
+	while (n.getKey()!=key);
+	return min;
+}
 
    /**
     * public HeapNode findMin()
@@ -165,7 +243,10 @@ public class FibonacciHeap
     */
     public void delete(HeapNode x) 
     {    
-    	return; // should be replaced by student code
+    	int minkey = this.min.getKey();
+    	
+    	decreaseKey(x, x.getKey()+minkey-1); // now x will have the lowest key in the heap
+    	this.deleteMin();
     }
 
    /**
@@ -174,10 +255,61 @@ public class FibonacciHeap
     * The function decreases the key of the node x by delta. The structure of the heap should be updated
     * to reflect this chage (for example, the cascading cuts procedure should be applied if needed).
     */
+    /**
+    * public void decreaseKey(HeapNode x, int delta)
+    *
+    * The function decreases the key of the node x by delta. The structure of the heap should be updated
+    * to reflect this change (for example, the cascading cuts procedure should be applied if needed).
+    */
     public void decreaseKey(HeapNode x, int delta)
     {    
-    	return; // should be replaced by student code
+    	// first we need to change the key
+    	x.key -= delta;
+    	// next, let's see if the heap property has been disrupted
+    	if (x.getKey()< x.getParent().getKey()) {
+    		return;
+    	}
+    	// we need to cut this branch
+    	HeapNode n = x.getParent();
+    	do {
+    	cut (x,n);
+    	this.insertTree(x);
+    	// if x's parent is not marked yet, we can just mark it
+    	if (!n.marked) {
+    		n.marked=true;
+    		this.numOfMarkedNodes++;
+    		return;
+    	}
+    	// if x's parent is marked, we continue the loop
+    	x = n;
+    	} while (x.marked);
     }
+
+   private void cut(HeapNode x, HeapNode n) { 
+	   // n is the parent of x
+	   x.parent = null;
+	   if (x.marked) {
+		   this.numOfMarkedNodes--;
+		   x.marked = false;
+	   }
+	   n.rank --;
+	   if (x.next==x) { // n has only one child
+		   n.child = null;
+   		}else {
+   			n.child = x.next;
+   			x.next.prev = x.prev; x.prev.next = x.next; // removing x from the DLL
+   		}
+	
+}
+
+
+private void insertTree(HeapNode tree) {
+	HeapNode first = this.first;
+	HeapNode last = first.getPrev();
+	this.first = tree;
+	tree.next = first; first.prev = tree;
+	tree.prev = last; last.next = tree;
+}
 
    /**
     * public int potential() 

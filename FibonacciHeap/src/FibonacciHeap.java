@@ -261,7 +261,7 @@ private HeapNode calcmin(HeapNode n) {
     * The function decreases the key of the node x by delta. The structure of the heap should be updated
     * to reflect this change (for example, the cascading cuts procedure should be applied if needed).
     */
-        public void decreaseKey(HeapNode x, int delta)
+       public void decreaseKey(HeapNode x, int delta)
     {    
     	// first we need to change the key
     	x.key -= delta;
@@ -273,53 +273,42 @@ private HeapNode calcmin(HeapNode n) {
     		return;
     	}
     	// next, let's see if the heap property has been disrupted
-    	if (x.getKey()< x.getParent().getKey()) {
-    		return;
+    	if (x.getKey()> x.getParent().getKey()) {
+    		// we need to cut this branch
+    		cascadingCut(x);
     	}
-    	// we need to cut this branch
-    	HeapNode n = x.getParent();
-    	if (!n.marked) {		// if x's parent is not marked yet there's no need for cascading
-    		cut (x,n);
-    		n.marked=true;
-    		this.numOfMarkedNodes++;
-        	this.insertTree(x);
-    		return;
-    	}
-    	else{			//x's parent is marked
-    		cut (x,n);
-    		this.insertTree(x);
-    		cut(n,n.getParent());
-    		this.insertTree(n);
-    		while (n.getParent().marked) {
-    			x = n.getParent();
-    			n = x.getParent();
-    			cut (x,n);
-        		this.insertTree(x);
-        		cut(n,n.getParent());
-        		this.insertTree(n);
-    		}
-    		n.getParent().marked=true;
-    		return;
-    	}
-    	
     }
 
-   private void cut(HeapNode x, HeapNode n) { 
-	   // n is the parent of x
+   private void cut(HeapNode x) { 
+	   HeapNode xp = x.getParent();
 	   x.parent = null;
 	   if (x.marked) {
 		   this.numOfMarkedNodes--;
 		   x.marked = false;
 	   }
-	   n.rank --;
 	   if (x.next==x) { // n has only one child
-		   n.child = null;
+		   xp.child = null;
+		   xp.rank--;
    		}else {
-   			n.child = x.next;
-   			x.next.prev = x.prev; x.prev.next = x.next; // removing x from the DLL
+   			xp.child = x.next;
+   			x.getNext().prev = x.getPrev(); x.getPrev().next = x.getNext(); // removing x from the DLL
    		}
+	   insertTree(x);
 	
 }
+ 
+   private void cascadingCut(HeapNode x) {
+       HeapNode xp = x.getParent();
+       cut(x);
+       if (xp.getParent() != null) {
+           if (!xp.marked) {
+        	   this.numOfMarkedNodes ++;
+               xp.marked = true;
+           } else {
+               cascadingCut(xp);
+           }
+       }
+   }
 
 
 private void insertTree(HeapNode tree) {

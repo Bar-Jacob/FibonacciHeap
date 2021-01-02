@@ -261,7 +261,7 @@ private HeapNode calcmin(HeapNode n) {
     * The function decreases the key of the node x by delta. The structure of the heap should be updated
     * to reflect this change (for example, the cascading cuts procedure should be applied if needed).
     */
-    public void decreaseKey(HeapNode x, int delta)
+        public void decreaseKey(HeapNode x, int delta)
     {    
     	// first we need to change the key
     	x.key -= delta;
@@ -271,18 +271,30 @@ private HeapNode calcmin(HeapNode n) {
     	}
     	// we need to cut this branch
     	HeapNode n = x.getParent();
-    	do {
-    	cut (x,n);
-    	this.insertTree(x);
-    	// if x's parent is not marked yet, we can just mark it
-    	if (!n.marked) {
+    	if (!n.marked) {		// if x's parent is not marked yet there's no need for cascading
+    		cut (x,n);
     		n.marked=true;
     		this.numOfMarkedNodes++;
+        	this.insertTree(x);
     		return;
     	}
-    	// if x's parent is marked, we continue the loop
-    	x = n;
-    	} while (x.marked);
+    	else{			//x's parent is marked
+    		cut (x,n);
+    		this.insertTree(x);
+    		cut(n,n.getParent());
+    		this.insertTree(n);
+    		while (n.getParent().marked) {
+    			x = n.getParent();
+    			n = x.getParent();
+    			cut (x,n);
+        		this.insertTree(x);
+        		cut(n,n.getParent());
+        		this.insertTree(n);
+    		}
+    		n.getParent().marked=true;
+    		return;
+    	}
+    	
     }
 
    private void cut(HeapNode x, HeapNode n) { 
@@ -304,11 +316,16 @@ private HeapNode calcmin(HeapNode n) {
 
 
 private void insertTree(HeapNode tree) {
+	// inserting this
 	HeapNode first = this.first;
 	HeapNode last = first.getPrev();
 	this.first = tree;
 	tree.next = first; first.prev = tree;
 	tree.prev = last; last.next = tree;
+	// updating min
+	if (tree.getKey()<=this.min.getKey()) {
+		this.min=tree;
+	}
 }
 
    /**

@@ -280,6 +280,7 @@ private HeapNode calcmin(HeapNode n) {
     }
 
    private void cut(HeapNode x) { 
+	   FibonacciHeap.numOfCuts++;
 	   HeapNode xp = x.getParent();
 	   x.parent = null;
 	   if (x.marked) {

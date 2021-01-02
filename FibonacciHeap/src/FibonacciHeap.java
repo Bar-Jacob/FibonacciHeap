@@ -66,9 +66,86 @@ public class FibonacciHeap
     */
     public void deleteMin()
     {
-     	return; // should be replaced by student code
+     	if (this.isEmpty()) { // we can't delete the min of an empty heap
+     		return;
+     	}
+     	if (this.size()==1) { // if the heap only has one node in it, let's just empty the heap
+     		this.min=null;
+     		this.size=0;
+     		this.first=null;
+     	}
+     	HeapNode node2delete = this.min;
+     	int rootrank = node2delete.getRank();
+     	// first we need to remove the min from our heap
+     	node2delete.prev.next=node2delete.next; //updating the sibling nodes in the DLL
+     	node2delete.next.prev=node2delete.prev;
+     	this.size -= 2^rootrank; // updating the size
      	
+     	
+     	// now we need to create another heap from the sons of the node we want to delete
+     	FibonacciHeap heap2meld = new FibonacciHeap();
+     	heap2meld.first = node2delete.getChild();
+     	this.size = (2^rootrank)-1; // the size of the new heap is 2^k-1, because we don't need the root
+     	deleteparent(node2delete.getChild());
+     	heap2meld.min = calcmin(heap2meld.first);
+     	// melding:
+     	this.meld(heap2meld);
+     	// now, we need to successive link our heap
+     	successive_link(this);
     }
+
+   private void deleteparent(HeapNode n) {
+	   int key = n.getKey();
+	   do {
+		   n.parent=null;
+		   n = n.getNext();
+	   }
+	   while (n.getKey()!=key); 
+}
+
+private void successive_link(FibonacciHeap fibonacciHeap) {
+	   // creating the array we'll export from. it needs to be around log(n)+1 long.
+	HeapNode[] arroftrees = new HeapNode[(int) (Math.ceil(Math.log(this.size))+1)];
+	HeapNode node = this.first;
+	node.prev.next=null; // disconnecting the end of the DLL
+	while (node!= null) {
+		int rank = node.getRank();
+		// we need to meld the trees together until we reach an empty slot
+		while(arroftrees[rank]!= null) {
+			node = link(node, arroftrees[rank]);
+			rank++;
+			}
+		arroftrees[rank]=node;
+		node = node.next;
+	}
+	// now, we need to change our heap to match the array.
+	this.first=null;
+	for (int i = 0; i < arroftrees.length; i++) {
+		HeapNode root = arroftrees[i];
+		if(root!= null) {
+			if (this.first==null) {
+				this.first = root;
+				root.next = root; root.prev=root; // creating a DLL with our first node
+			}else{ // we already inserted a tree to our heap
+				HeapNode last = this.first.prev;
+				last.next = root; root.prev = last;
+				root.next = this.first; this.first.prev = root;
+			}
+		}
+	}
+	this.min=calcmin(this.first);
+}
+
+private HeapNode calcmin(HeapNode n) {
+	int key = n.getKey();  // we need to complete one circular scan, starting at key n.getkey();
+	HeapNode min = n;
+	do {
+		if (n.getKey()<min.getKey()) {min = n;}
+		n = n.getNext();
+	}
+	while (n.getKey()!=key);
+	return min;
+}
 
    /**
     * public HeapNode findMin()
@@ -165,7 +242,10 @@ public class FibonacciHeap
     */
     public void delete(HeapNode x) 
     {    
-    	return; // should be replaced by student code
+    	int minkey = this.min.getKey();
+    	
+    	decreaseKey(x, x.getKey()+minkey-1); // now x will have the lowest key in the heap
+    	this.deleteMin();
     }
 
    /**

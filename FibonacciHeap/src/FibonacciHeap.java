@@ -64,30 +64,44 @@ public class FibonacciHeap
     * Delete the node containing the minimum key.
     *
     */
-    public void deleteMin()
+   public void deleteMin()
     {
      	if (this.isEmpty()) { // we can't delete the min of an empty heap
+     		System.out.println("empty");
      		return;
      	}
-     	if (this.size()==1) { // if the heap only has one node in it, let's just empty the heap
-     		this.min=null;
-     		this.size=0;
-     		this.first=null;
-     	}
-     	HeapNode node2delete = this.min;
-     	// first we need to remove the min from our heap
-     	node2delete.prev.next=node2delete.next; //updating the sibling nodes in the DLL
-     	node2delete.next.prev=node2delete.prev;
+     	// we are going to delete something
      	this.size --; // updating the size
+     	if (this.size()==0) { // if the heap only has one node in it, let's just empty the heap
+     		this.min=null;
+     		this.first=null;
+     		return;
+     	}
+     	HeapNode node2delete = this.min;     	
+     		// first we need to remove the min from our heap
+     	if (this.first==node2delete) {
+     		this.first=node2delete.next;
+     		}
+     	this.min=calcmin(this.first);
+     	if(node2delete.rank==0) { // min is a one noded tree
+         	node2delete.prev.next=node2delete.next; //updating the sibling nodes in the DLL
+         	node2delete.next.prev=node2delete.prev;
+         	this.min=calcmin(this.first);
+     		return;
+     	}
+     	// else, our node has kids!
+
+     			// min has children
      	HeapNode after = node2delete.getPrev();
      	HeapNode before = node2delete.getNext();
      	HeapNode son = node2delete.getChild();
-     	// updating node2delete's children- their parent should be none and they shouldn't be marked
+     	
+     			// updating node2delete's children- their parent should be none and they shouldn't be marked
      	updatesons(son);
-     	// now add the sons of the min in it's place
+     			// now add the sons of the min in it's place
      	before.next=son; after.prev = son.prev;
      	son.prev.next= after; son.prev = before;
-     	// now, we need to successive link our heap
+     			// now, we need to successive link our heap
      	successive_link(this);
     }
 

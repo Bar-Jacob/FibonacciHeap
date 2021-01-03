@@ -1,3 +1,8 @@
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+
+import org.omg.PortableInterceptor.SUCCESSFUL;
+
 /**
  * FibonacciHeap
  *
@@ -9,8 +14,8 @@ public class FibonacciHeap
 	private HeapNode min;
 	private HeapNode first;
     private int size = 0;
-    private static int numOfCuts = 0; 
-    private static int numOfLinks = 0;
+    static int numOfCuts = 0; 
+    static int numOfLinks = 0;
     private int numOfMarkedNodes = 0;
 
    /**
@@ -67,27 +72,41 @@ public class FibonacciHeap
     public void deleteMin()
     {
      	if (this.isEmpty()) { // we can't delete the min of an empty heap
+     		System.out.println("empty");
      		return;
      	}
-     	if (this.size()==1) { // if the heap only has one node in it, let's just empty the heap
-     		this.min=null;
-     		this.size=0;
-     		this.first=null;
-     	}
-     	HeapNode node2delete = this.min;
-     	// first we need to remove the min from our heap
-     	node2delete.prev.next=node2delete.next; //updating the sibling nodes in the DLL
-     	node2delete.next.prev=node2delete.prev;
+     	// we are going to delete something
      	this.size --; // updating the size
+     	if (this.size()==0) { // if the heap only has one node in it, let's just empty the heap
+     		this.min=null;
+     		this.first=null;
+     		return;
+     	}
+     	HeapNode node2delete = this.min;     	
+     		// first we need to remove the min from our heap
+     	if (this.first==node2delete) {
+     		this.first=node2delete.next;
+     		}
+     	this.min=calcmin(this.first);
+     	if(node2delete.rank==0) { // min is a one noded tree
+         	node2delete.prev.next=node2delete.next; //updating the sibling nodes in the DLL
+         	node2delete.next.prev=node2delete.prev;
+         	this.min=calcmin(this.first);
+     		return;
+     	}
+     	// else, our node has kids!
+
+     			// min has children
      	HeapNode after = node2delete.getPrev();
      	HeapNode before = node2delete.getNext();
      	HeapNode son = node2delete.getChild();
-     	// updating node2delete's children- their parent should be none and they shouldn't be marked
+     	
+     			// updating node2delete's children- their parent should be none and they shouldn't be marked
      	updatesons(son);
-     	// now add the sons of the min in it's place
+     			// now add the sons of the min in it's place
      	before.next=son; after.prev = son.prev;
      	son.prev.next= after; son.prev = before;
-     	// now, we need to successive link our heap
+     			// now, we need to successive link our heap
      	successive_link(this);
     }
 
@@ -148,7 +167,7 @@ private HeapNode calcmin(HeapNode n) {
 	return min;
 }
 
-   /**
+/**
     * public HeapNode findMin()
     *
     * Return the node of the heap whose key is minimal. 
@@ -169,7 +188,7 @@ private HeapNode calcmin(HeapNode n) {
     * before meld -> this.first.prev = z, heap2.first.prev = c
     * after meld -> this.first.prev = c, no heap2
     */
-   public void meld (FibonacciHeap heap2)
+    public void meld (FibonacciHeap heap2)
     {
     	//connecting c with x
     	heap2.first.prev.next = this.first; 
@@ -253,15 +272,9 @@ private HeapNode calcmin(HeapNode n) {
     * public void decreaseKey(HeapNode x, int delta)
     *
     * The function decreases the key of the node x by delta. The structure of the heap should be updated
-    * to reflect this chage (for example, the cascading cuts procedure should be applied if needed).
-    */
-    /**
-    * public void decreaseKey(HeapNode x, int delta)
-    *
-    * The function decreases the key of the node x by delta. The structure of the heap should be updated
     * to reflect this change (for example, the cascading cuts procedure should be applied if needed).
     */
-       public void decreaseKey(HeapNode x, int delta)
+    public void decreaseKey(HeapNode x, int delta)
     {    
     	// first we need to change the key
     	x.key -= delta;
@@ -325,7 +338,7 @@ private void insertTree(HeapNode tree) {
 	}
 }
 
-   /**
+/**
     * public int potential() 
     *
     * This function returns the current potential of the heap, which is:

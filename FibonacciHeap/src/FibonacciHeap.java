@@ -1,4 +1,3 @@
-
 /**
  * FibonacciHeap
  *
@@ -13,6 +12,7 @@ public class FibonacciHeap
     private static int numOfCuts = 0; 
     private static int numOfLinks = 0;
     private int numOfMarkedNodes = 0;
+    private int numOfTrees = 0;
 
    /**
     * public boolean isEmpty()
@@ -56,6 +56,7 @@ public class FibonacciHeap
     	}
     	
     	this.size++;
+    	this.numOfTrees++; 
     	return newNode; 
     }
 
@@ -186,6 +187,21 @@ private HeapNode calcmin(HeapNode n) {
     */
     public void meld (FibonacciHeap heap2)
     {
+	   if(this.isEmpty()) {
+		   if(heap2.isEmpty()) {
+			   return; //no need to change anything
+		   }else { //turn our heap to be heap2
+			   this.first = heap2.first;
+			   this.min = heap2.min;
+			   this.numOfMarkedNodes = heap2.numOfMarkedNodes;
+			   this.numOfTrees = heap2.numOfTrees;
+			   this.size = heap2.size;
+		   }
+	   }
+	   if(heap2.isEmpty()) { //no need to change anything, heap stays the same
+		   return;
+	   }
+	   
     	//connecting c with x
     	heap2.first.prev.next = this.first; 
     	//connecting z with a
@@ -200,6 +216,8 @@ private HeapNode calcmin(HeapNode n) {
     		heap2.min = null;
     	}
     	this.size += heap2.size();
+    	this.numOfMarkedNodes += heap2.numOfMarkedNodes;
+    	this.numOfTrees += heap2.numOfTrees;
     }
 
    /**
@@ -343,7 +361,7 @@ private void insertTree(HeapNode tree) {
     */
     public int potential() 
     {    
-    	return 0; // should be replaced by student code
+    	return this.numOfTrees + 2*this.numOfMarkedNodes;
     }
 
    /**

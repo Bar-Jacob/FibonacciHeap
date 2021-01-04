@@ -6,19 +6,24 @@ public class MyTest {
 		FibonacciHeap fib = new FibonacciHeap();
 		FibonacciHeap fib2 = new FibonacciHeap();
 		fib.insert(10);
-		FibonacciHeap.HeapNode a = fib.insert(5);
-		FibonacciHeap.HeapNode b = fib.insert(20);
+		fib.insert(5);
+		FibonacciHeap.HeapNode x = fib.insert(20);
 		fib2.insert(6);
 		fib2.insert(1);
 		fib2.insert(11);
 		
-		fib.meld(fib2);
+		fib.deleteMin();
+		fib.delete(x);
+		fib.deleteMin();
+		System.out.println(fib.isEmpty());
+
+//		fib.meld(fib2);
 //		System.out.println(fib.getFirst().key);
 //		System.out.println(fib.getFirst().getPrev().getKey()); //6
 //		System.out.println(fib.getFirst().getPrev().getNext().getKey()); //20
 		
-		fib.link(a, b);
-		System.out.println(fib.getFirst().getPrev().getKey());
+//		fib.link(a, b);
+//		System.out.println(fib.getFirst().getPrev().getKey());
 //		FibonacciHeap.HeapNode curr = fib.getFirst();
 //		System.out.println(curr.getKey());
 //		curr = curr.getNext();

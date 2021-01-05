@@ -13,6 +13,21 @@ public class FibonacciHeap
     private static int numOfLinks = 0;
     private int numOfMarkedNodes = 0;
     private int numOfTrees = 0;
+	
+	public void print() { //prints only the roots of the trees in our heaps
+    	HeapNode n = this.first;
+    	if(n==null) {
+    		System.out.println("(empty)");
+    		return;
+    	}
+    	int k = n.getPrev().getKey();
+    	while(n.getKey()!=k) {
+    		System.out.print("("+n.getKey()+")-");
+    		n=n.next;
+    	}
+    	System.out.print("("+k+")");
+    	System.out.println();
+    }
 
    /**
     * public boolean isEmpty()

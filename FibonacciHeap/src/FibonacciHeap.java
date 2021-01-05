@@ -13,6 +13,21 @@ public class FibonacciHeap
     private static int numOfLinks = 0;
     private int numOfMarkedNodes = 0;
     private int numOfTrees = 0;
+	
+	public void print() { //prints only the roots of the trees in our heaps
+    	HeapNode n = this.first;
+    	if(n==null) {
+    		System.out.println("(empty)");
+    		return;
+    	}
+    	int k = n.getPrev().getKey();
+    	while(n.getKey()!=k) {
+    		System.out.print("("+n.getKey()+")-");
+    		n=n.next;
+    	}
+    	System.out.print("("+k+")");
+    	System.out.println();
+    }
 
    /**
     * public boolean isEmpty()
@@ -66,80 +81,124 @@ public class FibonacciHeap
     * Delete the node containing the minimum key.
     *
     */
-    public void deleteMin()
+public void deleteMin()
     {
      	if (this.isEmpty()) { // we can't delete the min of an empty heap
-     		System.out.println("empty");
      		return;
      	}
      	// we are going to delete something
      	this.size --; // updating the size
-     	if (this.size()==0) { // if the heap only has one node in it, let's just empty the heap
-     		this.min=null;
-     		this.first=null;
-     		return;
-     	}
-     	HeapNode node2delete = this.min;     	
-     		// first we need to remove the min from our heap
-     	if (this.first==node2delete) {
-     		this.first=node2delete.next;
-     		}
-     	this.min=calcmin(this.first);
-     	if(node2delete.rank==0) { // min is a one noded tree
-         	node2delete.prev.next=node2delete.next; //updating the sibling nodes in the DLL
-         	node2delete.next.prev=node2delete.prev;
-         	this.min=calcmin(this.first);
-     		return;
-     	}
-     	// else, our node has kids!
-
-     			// min has children
-     	HeapNode after = node2delete.getPrev();
-     	HeapNode before = node2delete.getNext();
-     	HeapNode son = node2delete.getChild();
+     	HeapNode node2delete = this.min;   
      	
-     			// updating node2delete's children- their parent should be none and they shouldn't be marked
-     	updatesons(son);
-     			// now add the sons of the min in it's place
-     	before.next=son; after.prev = son.prev;
-     	son.prev.next= after; son.prev = before;
-     			// now, we need to successive link our heap
-     	successive_link(this);
+     	if(node2delete.rank==0) { // min is a one noded tree
+     		this.numOfTrees--; // because wer'e just removing a node, the number of trees will decrease
+     		if(this.numOfTrees==0) { //our heap has only one tree that wer'e going to delete now
+     			this.min=null;
+         		this.first=null;
+         		return;		// our heap is now empty
+     		}else {	//our heap has more than one tree
+     			if(this.getFirst()==node2delete) { // our first pointer is our min as well
+     				this.first = node2delete.getNext();
+     				this.getFirst().prev = node2delete.getPrev();
+     				this.getFirst().getPrev().next = this.getFirst();
+     			}else {
+     				node2delete.getPrev().next=node2delete.getNext(); //updating the sibling nodes in the DLL
+                 	node2delete.getNext().prev=node2delete.getPrev();
+     			}
+     		}
+     	}else {
+         	// else, our node has kids!
+     		if(this.first.next==this.first) { //our heap has only one tree
+     			this.first=this.first.getChild();
+     				// updating node2delete's children- their parent should be none and they shouldn't be marked
+         		int numofsons= updatesons(this.first);
+         		this.numOfTrees+= numofsons-1; // adding all of the sons as root, -1 for the root we removed
+     		}else {	//our heap has more than one tree
+//     			System.out.println("our heap has more than one tree");
+     			HeapNode after = node2delete.getNext();
+         		HeapNode before = node2delete.getPrev();
+         		HeapNode son = node2delete.getChild();
+//         		System.out.println("min's child is "+son.getKey());
+         			// updating node2delete's children- their parent should be none and they shouldn't be marked
+         		int numofsons= updatesons(son);
+         		this.numOfTrees+= numofsons-1; // adding all of the sons as root, -1 for the root we removed
+         				// now add the sons of the min in it's place
+         		before.next=son; after.prev = son.prev;
+         		son.prev.next= after; son.prev = before;
+         		if(this.first==node2delete) {
+         			this.first=son;
+         		}
+         		// now wer'e ready to successive link
+     		}
+     	}
+     			// now, we need to successive link our heap if it has more than one root
+//     	if(this.getFirst()!=this.getFirst().getNext()) { //we need to successive link
+         	successive_link(this);
+//     	}
+     	// now we need to update min
+//     	System.out.println("before we calc the new min, lets print our roots:");
+//     	this.print();
+//     	System.out.println("+++++++++");
+     	this.calcmin();
+     	
     }
 
-   private void updatesons(HeapNode n) {
+   private int updatesons(HeapNode n) {
+	   if (n==null) {
+		   System.out.println("node has no kids");
+		   return 0;
+	   }
 	   int key = n.getKey();
+	   int count=0;
 	   do {
 		   n.parent = null;
 		   if (n.marked) {
 			   this.numOfMarkedNodes--;
 			   n.marked = false;
 		   }
+		   count++;
 		   n = n.getNext();
 	   }
 	   while (n.getKey()!=key); 
+	   return count;
+	   
 }
 
 private void successive_link(FibonacciHeap fibonacciHeap) {
+	// storing our current nodes
+	HeapNode[] arr = new HeapNode[this.numOfTrees];
 	   // creating the array we'll export from. it needs to be around log(n)+1 long.
-	HeapNode[] arroftrees = new HeapNode[(int) (Math.ceil(Math.log(this.size))+1)];
+	int log2 = (int) (Math.ceil(Math.log(this.size)/ Math.log(2))+1);
+	HeapNode[] arroftrees = new HeapNode[log2];
 	HeapNode node = this.first;
-	node.prev.next=null; // disconnecting the end of the DLL
-	while (node!= null) {
-		int rank = node.getRank();
+	for (int i = 0; i < arr.length; i++) {
+		arr[i] = node;
+		node = node.getNext();
+	}
+	for (HeapNode n : arr) {
+		n.next=null;
+		n.prev =null;
+		int rank = n.getRank();
+//		System.out.println("linking node: "+n.getKey()+". rank: "+n.rank);
 		// we need to meld the trees together until we reach an empty slot
-		while(arroftrees[rank]!= null) {
-			node = link(node, arroftrees[rank]);
+		while(rank<arroftrees.length && arroftrees[rank]!= null) {
+//			System.out.println("linking node "+n.getKey()+" with node "+arroftrees[rank].getKey());
+			n = link(n, arroftrees[rank]);
+//			System.out.println("the new root is "+n.getKey());
+			arroftrees[rank]=null;
 			rank++;
 			}
-		arroftrees[rank]=node;
-		node = node.next;
+		arroftrees[rank]=n;
+		
+		
 	}
 	// now, we need to change our heap to match the array.
 	this.first=null;
+	this.numOfTrees=0;
 	for (int i = 0; i < arroftrees.length; i++) {
 		HeapNode root = arroftrees[i];
 		if(root!= null) {
+			 numOfTrees++;
 			if (this.first==null) {
 				this.first = root;
 				root.next = root; root.prev=root; // creating a DLL with our first node
@@ -147,21 +206,21 @@ private void successive_link(FibonacciHeap fibonacciHeap) {
 				HeapNode last = this.first.prev;
 				last.next = root; root.prev = last;
 				root.next = this.first; this.first.prev = root;
+				this.first = root;
 			}
 		}
 	}
-	this.min=calcmin(this.first);
 }
 
-private HeapNode calcmin(HeapNode n) {
-	int key = n.getKey();  // we need to complete one circular scan, starting at key n.getkey();
-	HeapNode min = n;
-	do {
-		if (n.getKey()<min.getKey()) {min = n;}
-		n = n.getNext();
+private void calcmin() {
+	this.min = this.first; // first we delete our old min
+	HeapNode node = this.first;
+	for (int i=0; i<this.numOfTrees; i++) { // working all the roots in our heap, and updating the min accordingly
+		if(this.findMin().getKey()>node.getKey()) {
+			this.min = node;
+		}
+		node=node.getNext();
 	}
-	while (n.getKey()!=key);
-	return min;
 }
 
 /**

@@ -14,14 +14,14 @@ public class FibonacciHeap
     private int numOfMarkedNodes = 0;
     private int numOfTrees = 0;
 	
-	public void print() { //prints only the roots of the trees in our heaps
+	public void print() { //prints roots
     	HeapNode n = this.first;
     	if(n==null) {
     		System.out.println("(empty)");
     		return;
     	}
     	int k = n.getPrev().getKey();
-    	while(n.getKey()!=k) {
+    	for(int i=0; i<this.numOfTrees-1; i++) {
     		System.out.print("("+n.getKey()+")-");
     		n=n.next;
     	}
@@ -351,37 +351,46 @@ private void calcmin() {
     {    
     	// first we need to change the key
     	x.key -= delta;
-    	// if x is a root of a tree, we just need to check if we need to update the min
-    	if (x.getParent()==null) {
-    		if (x.getKey()<this.min.getKey()) {
-    			this.min = x;
-    		}
-    		return;
-    	}
-    	// next, let's see if the heap property has been disrupted
-    	if (x.getKey()> x.getParent().getKey()) {
-    		// we need to cut this branch
-    		cascadingCut(x);
-    	}
+    	// we need to check if we need to update the min
+    	updatemin(x);
+    	if (x.getParent()!=null) {
+    		if (x.getKey()< x.getParent().getKey()) {
+        		// we need to cut this branch
+        		cascadingCut(x);
+        	}
+    	}    	
     }
 
-   private void cut(HeapNode x) { 
-	   FibonacciHeap.numOfCuts++;
+   private void updatemin(HeapNode n) {
+	if(this.min==null || n.getKey()<this.min.getKey()) {
+		this.min = n;
+	}
+	
+}
+
+
+
+
+private void cut(HeapNode x) { 
+	   numOfCuts++;
+	   numOfTrees++;
 	   HeapNode xp = x.getParent();
 	   x.parent = null;
 	   if (x.marked) {
 		   this.numOfMarkedNodes--;
 		   x.marked = false;
 	   }
-	   if (x.next==x) { // n has only one child
+	   if (xp.rank==1) { // n has only one child
 		   xp.child = null;
-		   xp.rank--;
    		}else {
-   			xp.child = x.next;
+   			if(xp.getChild()==x) {
+   	   			xp.child = x.next;
+   			}
    			x.getNext().prev = x.getPrev(); x.getPrev().next = x.getNext(); // removing x from the DLL
    		}
+	   xp.rank--;
 	   insertTree(x);
-	
+
 }
  
    private void cascadingCut(HeapNode x) {
@@ -389,7 +398,7 @@ private void calcmin() {
        cut(x);
        if (xp.getParent() != null) {
            if (!xp.marked) {
-        	   this.numOfMarkedNodes ++;
+        	   numOfMarkedNodes ++;
                xp.marked = true;
            } else {
                cascadingCut(xp);
@@ -399,12 +408,22 @@ private void calcmin() {
 
 
 private void insertTree(HeapNode tree) {
+	//sanity check
+	if (tree==null) {
+		return;
+	}
 	// inserting this
+	numOfTrees++;
 	HeapNode first = this.first;
 	HeapNode last = first.getPrev();
 	this.first = tree;
 	tree.next = first; first.prev = tree;
 	tree.prev = last; last.next = tree;
+	//updat marks:
+	if(tree.marked) {
+		tree.marked=false;
+		numOfMarkedNodes--;
+	}
 	// updating min
 	if (tree.getKey()<=this.min.getKey()) {
 		this.min=tree;

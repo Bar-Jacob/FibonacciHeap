@@ -12,7 +12,7 @@ public class FibonacciHeap
     private static int numOfCuts = 0; 
     private static int numOfLinks = 0;
     private int numOfMarkedNodes = 0;
-    private int numOfTrees = 0;
+    public int numOfTrees = 0;
 	
 	public void print() { //prints roots
     	HeapNode n = this.first;
@@ -485,8 +485,12 @@ private void insertTree(HeapNode tree) {
             	//inserting the first node 
             	HeapNode iNode = fibHeap.insert(currNode.getKey()); // iNode = inserted Node
                 iNode.setInfo(currNode); 							//connecting a node from fibHeap it's origin in H
+                int currKey = currNode.getKey();
                 currNode = currNode.next;
-                while(currNode != null || currNode != H.first) {	//we always start from the first because we have pointer to the left most child
+                while(currNode != null) {	//we always start from the first because we have pointer to the left most child
+                	if(currNode.getKey() == currKey) {
+                		break;
+                	}
                 	iNode = fibHeap.insert(currNode.getKey());
                     iNode.setInfo(currNode); 						
                     currNode = currNode.next;

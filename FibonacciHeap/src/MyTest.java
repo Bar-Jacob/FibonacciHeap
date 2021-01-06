@@ -7,15 +7,18 @@ public class MyTest {
 		FibonacciHeap fib2 = new FibonacciHeap();
 		fib.insert(10);
 		fib.insert(5);
-		FibonacciHeap.HeapNode x = fib.insert(20);
-		fib2.insert(6);
-		fib2.insert(1);
-		fib2.insert(11);
+		fib.insert(20);
+		fib.insert(6);
+		fib.insert(2);
+//		fib2.insert(6);
+//		fib2.insert(1);
+//		fib2.insert(11);
 		
 		fib.deleteMin();
-		fib.delete(x);
-		fib.deleteMin();
-		System.out.println(fib.isEmpty());
+//		System.out.println(fib.numOfTrees);
+		int[] test = FibonacciHeap.kMin(fib, 3);
+		System.out.println(Arrays.toString(test));
+		
 
 //		fib.meld(fib2);
 //		System.out.println(fib.getFirst().key);

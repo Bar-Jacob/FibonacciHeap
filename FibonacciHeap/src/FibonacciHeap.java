@@ -20,14 +20,13 @@ public class FibonacciHeap
     		System.out.println("(empty)");
     		return;
     	}
-    	int k = n.getPrev().getKey();
-    	for(int i=0; i<this.numOfTrees-1; i++) {
+    	for(int i=0; i<this.numOfTrees; i++) {
     		System.out.print("("+n.getKey()+")-");
     		n=n.next;
     	}
-    	System.out.print("("+k+")");
     	System.out.println();
     }
+
 
    /**
     * public boolean isEmpty()
@@ -114,11 +113,9 @@ public void deleteMin()
          		int numofsons= updatesons(this.first);
          		this.numOfTrees+= numofsons-1; // adding all of the sons as root, -1 for the root we removed
      		}else {	//our heap has more than one tree
-//     			System.out.println("our heap has more than one tree");
      			HeapNode after = node2delete.getNext();
          		HeapNode before = node2delete.getPrev();
          		HeapNode son = node2delete.getChild();
-//         		System.out.println("min's child is "+son.getKey());
          			// updating node2delete's children- their parent should be none and they shouldn't be marked
          		int numofsons= updatesons(son);
          		this.numOfTrees+= numofsons-1; // adding all of the sons as root, -1 for the root we removed
@@ -131,21 +128,14 @@ public void deleteMin()
          		// now wer'e ready to successive link
      		}
      	}
-     			// now, we need to successive link our heap if it has more than one root
-//     	if(this.getFirst()!=this.getFirst().getNext()) { //we need to successive link
-         	successive_link(this);
-//     	}
+     	// now, we need to successive link our heap if it has more than one root
+         successive_link(this);
      	// now we need to update min
-//     	System.out.println("before we calc the new min, lets print our roots:");
-//     	this.print();
-//     	System.out.println("+++++++++");
      	this.calcmin();
-     	
     }
 
    private int updatesons(HeapNode n) {
 	   if (n==null) {
-		   System.out.println("node has no kids");
 		   return 0;
 	   }
 	   int key = n.getKey();
@@ -179,12 +169,9 @@ private void successive_link(FibonacciHeap fibonacciHeap) {
 		n.next=null;
 		n.prev =null;
 		int rank = n.getRank();
-//		System.out.println("linking node: "+n.getKey()+". rank: "+n.rank);
 		// we need to meld the trees together until we reach an empty slot
 		while(rank<arroftrees.length && arroftrees[rank]!= null) {
-//			System.out.println("linking node "+n.getKey()+" with node "+arroftrees[rank].getKey());
 			n = link(n, arroftrees[rank]);
-//			System.out.println("the new root is "+n.getKey());
 			arroftrees[rank]=null;
 			rank++;
 			}
@@ -373,14 +360,14 @@ private void calcmin() {
 
 private void cut(HeapNode x) { 
 	   numOfCuts++;
-	   numOfTrees++;
+//	   numOfTrees++;
 	   HeapNode xp = x.getParent();
 	   x.parent = null;
 	   if (x.marked) {
 		   this.numOfMarkedNodes--;
 		   x.marked = false;
 	   }
-	   if (xp.rank==1) { // n has only one child
+	   if (x.getNext()==x) { // n has only one child
 		   xp.child = null;
    		}else {
    			if(xp.getChild()==x) {
@@ -400,6 +387,7 @@ private void cut(HeapNode x) {
            if (!xp.marked) {
         	   numOfMarkedNodes ++;
                xp.marked = true;
+               return;
            } else {
                cascadingCut(xp);
            }
@@ -419,7 +407,8 @@ private void insertTree(HeapNode tree) {
 	this.first = tree;
 	tree.next = first; first.prev = tree;
 	tree.prev = last; last.next = tree;
-	//updat marks:
+
+	//update marks:
 	if(tree.marked) {
 		tree.marked=false;
 		numOfMarkedNodes--;
